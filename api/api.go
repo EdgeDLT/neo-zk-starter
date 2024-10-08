@@ -9,7 +9,6 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract/zkpbinding"
 )
 
-// Update GenerateProof parameters and circuit inputs to match your use case
 // Returns the proof, public witness, and location commitment
 func GenerateProof(circuitName string, input uint64) (*zkpbinding.VerifyProofArgs, groth16.Proof, groth16.VerifyingKey, witness.Witness, string) {
 	circ, exists := circuit.GetCircuit(circuitName)
