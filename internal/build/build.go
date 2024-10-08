@@ -18,15 +18,15 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract/zkpbinding"
 )
 
-func createKeysAndCircuit(circ circuit.Circuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
+func createKeysAndCircuit(circuitName string, circ circuit.Circuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
 	println("Creating new proving/verifying keys and circuit")
 	ccs, _ := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circ)
 	pk, vk, _ := groth16.Setup(ccs)
 	// pk, vk, _ := setup.Setup(ccs, "data/response21", 21) // use a real response file for production
 
-	util.WriteDataToFile("prover-key", pk)
-	util.WriteDataToFile("verifier-key", vk)
-	util.WriteDataToFile("r1cs", ccs)
+	util.WriteDataToFile(circuitName, "prover_key", pk)
+	util.WriteDataToFile(circuitName, "verifier_key", vk)
+	util.WriteDataToFile(circuitName, "r1cs", ccs)
 
 	println("Created key and circuit files")
 
@@ -46,15 +46,15 @@ func Init(circuitName string, rebuild bool) (circuit.Circuit, constraint.Constra
 	// Check if the 'prover-key' file exists
 	if rebuild {
 		println("Rebuilding proving/verifying keys and circuit")
-		ccs, pk, vk = createKeysAndCircuit(circ)
-	} else if _, err := os.Stat("data/prover-key"); errors.Is(err, os.ErrNotExist) {
-		ccs, pk, vk = createKeysAndCircuit(circ)
+		ccs, pk, vk = createKeysAndCircuit(circuitName, circ)
+	} else if _, err := os.Stat(filepath.Join("data", fmt.Sprintf("%s_prover_key", circuitName))); errors.Is(err, os.ErrNotExist) {
+		ccs, pk, vk = createKeysAndCircuit(circuitName, circ)
 	} else {
 		println("Files exist, loading existing proving/verifying keys and circuit")
 
-		pk, _ = util.ReadProvingKeyFromFile("prover-key")
-		vk, _ = util.ReadVerifyingKeyFromFile("verifier-key")
-		ccs, _ = util.ReadConstraintSystemFromFile("r1cs")
+		pk, _ = util.ReadProvingKeyFromFile(circuitName)
+		vk, _ = util.ReadVerifyingKeyFromFile(circuitName)
+		ccs, _ = util.ReadConstraintSystemFromFile(circuitName)
 	}
 
 	return circ, ccs, pk, vk

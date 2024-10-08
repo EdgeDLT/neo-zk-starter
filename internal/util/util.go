@@ -20,47 +20,77 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract/manifest"
 )
 
-func WriteDataToFile(filename string, data io.WriterTo) error {
-	file, err := os.Create(filepath.Join("data/", filename))
+func ensureDataDir() error {
+	dataDir := filepath.Join("data")
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		return os.MkdirAll(dataDir, 0755)
+	}
+	return nil
+}
+
+func WriteDataToFile(circuitName, filename string, data io.WriterTo) error {
+	if err := ensureDataDir(); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+	file, err := os.Create(filepath.Join("data", fmt.Sprintf("%s_%s", circuitName, filename)))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create file: %w", err)
 	}
 	defer file.Close()
 
 	_, err = data.WriteTo(file)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to write data: %w", err)
+	}
+	return nil
 }
 
-func ReadProvingKeyFromFile(filename string) (groth16.ProvingKey, error) {
-	file, err := os.Open(filepath.Join("data/", filename))
+func ReadProvingKeyFromFile(circuitName string) (groth16.ProvingKey, error) {
+	file, err := os.Open(filepath.Join("data", fmt.Sprintf("%s_prover_key", circuitName)))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open prover key file: %w", err)
 	}
 	defer file.Close()
 
 	pk := groth16.NewProvingKey(ecc.BLS12_381)
 	_, err = pk.ReadFrom(file)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read prover key: %w", err)
 	}
 
 	return pk, nil
 }
 
-func ReadVerifyingKeyFromFile(filename string) (groth16.VerifyingKey, error) {
-	file, err := os.Open(filepath.Join("data/", filename))
+func ReadVerifyingKeyFromFile(circuitName string) (groth16.VerifyingKey, error) {
+	file, err := os.Open(filepath.Join("data", fmt.Sprintf("%s_verifier_key", circuitName)))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open verifier key file: %w", err)
 	}
 	defer file.Close()
 
 	vk := groth16.NewVerifyingKey(ecc.BLS12_381)
 	_, err = vk.ReadFrom(file)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read verifier key: %w", err)
 	}
 
 	return vk, nil
+}
+
+func ReadConstraintSystemFromFile(circuitName string) (constraint.ConstraintSystem, error) {
+	file, err := os.Open(filepath.Join("data", fmt.Sprintf("%s_r1cs", circuitName)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to open r1cs file: %w", err)
+	}
+	defer file.Close()
+
+	ccs := groth16.NewCS(ecc.BLS12_381)
+	_, err = ccs.ReadFrom(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read r1cs: %w", err)
+	}
+
+	return ccs, nil
 }
 
 func StringToUint64(str string, base int) uint64 {
@@ -73,22 +103,6 @@ func StringToBigInt(str string, base int) *big.Int {
 	bigNum := new(big.Int)
 	bigNum.SetString(str, base)
 	return bigNum
-}
-
-func ReadConstraintSystemFromFile(filename string) (constraint.ConstraintSystem, error) {
-	file, err := os.Open(filepath.Join("data/", filename))
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	ccs := groth16.NewCS(ecc.BLS12_381)
-	_, err = ccs.ReadFrom(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return ccs, nil
 }
 
 // Use this method to pre-compute hash commitments outside of the circuit.
