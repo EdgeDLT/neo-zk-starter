@@ -50,35 +50,21 @@ func VerifyMerkleProof(api frontend.API, leafHash, root frontend.Variable, proof
 }
 
 func (circuit *MerkleVerifyCircuit) Define(api frontend.API) error {
-	h, err := mimc.NewMiMC(api)
-	if err != nil {
-		return err
-	}
-
 	api.Println("LeafHash:", circuit.LeafHash)
 	api.Println("Root:", circuit.Root)
 
-	currentHash := circuit.LeafHash
-
+	// Convert the fixed-size array to a slice
+	proofElementsSlice := make([]frontend.Variable, MaxProofElements)
 	for i := 0; i < MaxProofElements; i++ {
-		proofElement := circuit.ProofElements[i]
-		api.Println(fmt.Sprintf("ProofElement[%d]:", i), proofElement)
-
-		// Perform the hash in path order
-		h.Reset()
-		h.Write(currentHash)
-		h.Write(proofElement)
-		newHash := h.Sum()
-
-		// Only update the hash if the proofElement is non-zero
-		isZero := api.IsZero(proofElement)
-		currentHash = api.Select(isZero, currentHash, newHash)
-
-		api.Println(fmt.Sprintf("Hash after element %d:", i), currentHash)
+		proofElementsSlice[i] = circuit.ProofElements[i]
+		api.Println(fmt.Sprintf("ProofElement[%d]:", i), proofElementsSlice[i])
 	}
 
-	api.Println("Final Hash:", currentHash)
-	api.AssertIsEqual(currentHash, circuit.Root)
+	// Use the VerifyMerkleProof function
+	err := VerifyMerkleProof(api, circuit.LeafHash, circuit.Root, proofElementsSlice)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
