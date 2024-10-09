@@ -28,19 +28,23 @@ func (c *HashCommitmentCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *HashCommitmentCircuit) PrepareInput(input interface{}) (Circuit, string) {
+func (c *HashCommitmentCircuit) PrepareInput(input interface{}) (Circuit, []string) {
 	// The HashInputsToString function emulates the MiMC hash used in the circuit.
 	// It accepts any number of inputs as uint64 or *big.Int.
 	// Data is written to the hash in sequential writes, one for each input.
 	// The function returns a string representation of the hash.
 	// The helper function StringToBigInt can convert the string to a big.Int for use as a circuit input.
-	inputCommit := util.HashInputsToString([]interface{}{input})
+	uint64Input, ok := input.(uint64)
+	if !ok {
+		panic("Input must be uint64 for HashCommitmentCircuit")
+	}
 
-	var assignment HashCommitmentCircuit
-	assignment.HiddenInput = input
-	assignment.InputCommitment = util.StringToBigInt(inputCommit, 10)
+	inputCommit := util.HashInputsToString([]interface{}{uint64Input})
 
-	return &assignment, inputCommit
+	return &HashCommitmentCircuit{
+		HiddenInput:     uint64Input,
+		InputCommitment: util.StringToBigInt(inputCommit, 10),
+	}, []string{inputCommit}
 }
 
 func (c *HashCommitmentCircuit) ValidInput() Circuit {

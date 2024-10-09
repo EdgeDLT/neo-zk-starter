@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -44,18 +45,36 @@ func main() {
 				Usage:   "Generate a proof for a circuit",
 				Action: func(ctx *cli.Context) error {
 					circuitName := ctx.String("circuit")
-					var input uint64
+					var input interface{}
 					if ctx.IsSet("input") {
-						input = util.StringToUint64(ctx.String("input"), 10)
+						input = ctx.String("input")
 					} else if ctx.NArg() > 0 {
-						input = util.StringToUint64(ctx.Args().First(), 10)
+						input = ctx.Args().First()
 					} else {
 						return cli.NewExitError("Input is required", 1)
 					}
-					_, proof, vk, witness, commitment := api.GenerateProof(circuitName, input)
-					println("Commitment: ", commitment)
-					println("Proof: ", proof)
-					println("Verify: ", api.VerifyProof(proof, vk, witness))
+
+					// For hash_commitment circuit, convert input to uint64
+					if circuitName == "hash_commitment" {
+						input = util.StringToUint64(input.(string), 10)
+					}
+
+					_, proof, vk, witness, additionalOutput, err := api.GenerateProof(circuitName, input)
+					if err != nil {
+						return cli.NewExitError(fmt.Sprintf("Failed to generate proof: %v", err), 1)
+					}
+
+					// Print all additional output
+					for _, output := range additionalOutput {
+						println(output)
+					}
+
+					println("Proof:", proof)
+					verified, err := api.VerifyProof(proof, vk, witness)
+					if err != nil {
+						return cli.NewExitError(fmt.Sprintf("Failed to verify proof: %v", err), 1)
+					}
+					println("Verify:", verified)
 					return nil
 				},
 				Flags: []cli.Flag{

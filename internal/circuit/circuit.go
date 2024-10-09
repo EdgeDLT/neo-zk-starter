@@ -8,7 +8,7 @@ import (
 
 type Circuit interface {
 	Define(api frontend.API) error
-	PrepareInput(input interface{}) (Circuit, string)
+	PrepareInput(input interface{}) (Circuit, []string)
 	ValidInput() Circuit
 }
 
