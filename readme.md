@@ -8,7 +8,7 @@ Credits to `consensys/gnark` for making ZK tech accessible and `nspcc-dev/neo-go
 
 This repo allows users to create, test, and work with multiple zero-knowledge circuits.
 
-By default, it includes a hash commitment circuit that allows a user to prove they know the preimage for a given hash commitment without revealing the preimage.
+By default, the commands will build and test the `hash_commitment` circuit, which allows a user to prove they know the preimage for a given hash commitment without revealing the preimage. There is also a `merkle_verify` circuit which can verify a proof for a MiMC-Merkle tree.
 
 Most of the circuit-specific logic lives in `internal/circuit/` directory. Each circuit implements the `Circuit` interface defined in `circuit/circuit.go`.
 
