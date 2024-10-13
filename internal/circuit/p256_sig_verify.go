@@ -41,9 +41,6 @@ func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (Circuit, []strin
 	sigS := emulated.ValueOf[emparams.P256Fr](inputData.Signature[32:])
 	msg := emulated.ValueOf[emparams.P256Fr](inputData.MessageHash)
 
-	fr, _ := emulated.NewField[emparams.P256Fr](nil)
-	processedMsg := fr.Reduce(&msg)
-
 	return &P256SigVerifyCircuit{
 		PublicKey: ecdsa.PublicKey[emparams.P256Fp, emparams.P256Fr]{
 			X: keyX,
@@ -53,7 +50,7 @@ func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (Circuit, []strin
 			R: sigR,
 			S: sigS,
 		},
-		MessageHash: *processedMsg,
+		MessageHash: msg,
 	}, []string{}
 }
 
