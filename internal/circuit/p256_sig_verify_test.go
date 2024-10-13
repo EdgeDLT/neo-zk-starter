@@ -20,7 +20,7 @@ func TestP256SigVerifyCircuit(t *testing.T) {
 
 	// Test with valid inputs
 	assert.ProverSucceeded(circuit, validAssignment,
-		test.WithCurves(ecc.BW6_761),
+		test.WithCurves(ecc.BLS12_381),
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid signature
@@ -33,7 +33,7 @@ func TestP256SigVerifyCircuit(t *testing.T) {
 		MessageHash: validAssignment.MessageHash,
 	}
 	assert.ProverFailed(circuit, invalidSigAssignment,
-		test.WithCurves(ecc.BW6_761),
+		test.WithCurves(ecc.BLS12_381),
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid MessageHash
@@ -44,6 +44,6 @@ func TestP256SigVerifyCircuit(t *testing.T) {
 		MessageHash: emulated.ValueOf[emparams.P256Fr](mockHash.BytesBE()), // Some arbitrary invalid MessageHash
 	}
 	assert.ProverFailed(circuit, invalidMsgAssignment,
-		test.WithCurves(ecc.BW6_761),
+		test.WithCurves(ecc.BLS12_381),
 		test.WithBackends(backend.GROTH16))
 }
