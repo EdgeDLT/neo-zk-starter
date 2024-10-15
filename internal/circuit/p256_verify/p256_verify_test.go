@@ -1,4 +1,4 @@
-package circuit
+package p256_verify
 
 import (
 	"testing"

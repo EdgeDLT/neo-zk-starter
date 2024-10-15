@@ -1,6 +1,8 @@
-package circuit
+package p256_verify
 
 import (
+	"zkp_example/internal/circuit"
+
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_emulated"
 	"github.com/consensys/gnark/std/math/emulated"
@@ -27,7 +29,7 @@ func (c *P256SigVerifyCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (Circuit, []string) {
+func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
 
 	inputData, ok := input.(struct {
 		PublicKey   *keys.PublicKey
@@ -57,7 +59,7 @@ func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (Circuit, []strin
 	}, []string{}
 }
 
-func (c *P256SigVerifyCircuit) ValidInput() Circuit {
+func (c *P256SigVerifyCircuit) ValidInput() circuit.Circuit {
 
 	w, _ := wallet.NewAccount()
 	MessageHash := []byte("hello world")
@@ -78,5 +80,5 @@ func (c *P256SigVerifyCircuit) ValidInput() Circuit {
 }
 
 func init() {
-	RegisterCircuit("p256_sig_verify", func() Circuit { return &P256SigVerifyCircuit{} })
+	circuit.RegisterCircuit("p256_verify", func() circuit.Circuit { return &P256SigVerifyCircuit{} })
 }

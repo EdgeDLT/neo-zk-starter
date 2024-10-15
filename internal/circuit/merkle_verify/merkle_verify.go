@@ -3,6 +3,7 @@ package circuit
 import (
 	"fmt"
 	"math/big"
+	"zkp_example/internal/circuit"
 	"zkp_example/internal/util"
 
 	"github.com/consensys/gnark/frontend"
@@ -69,7 +70,7 @@ func (circuit *MerkleVerifyCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *MerkleVerifyCircuit) PrepareInput(input interface{}) (Circuit, []string) {
+func (c *MerkleVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
 	// Expecting the input to be a struct with the necessary fields
 	inputData, ok := input.(struct {
 		LeafHash      *big.Int
@@ -96,7 +97,7 @@ func (c *MerkleVerifyCircuit) PrepareInput(input interface{}) (Circuit, []string
 	}, []string{inputData.LeafHash.String(), inputData.Root.String()}
 }
 
-func (c *MerkleVerifyCircuit) ValidInput() Circuit {
+func (c *MerkleVerifyCircuit) ValidInput() circuit.Circuit {
 
 	// Example Merkle tree stores account information for a ZK-Rollup
 	// Create two account leaves
@@ -138,5 +139,5 @@ func (c *MerkleVerifyCircuit) ValidInput() Circuit {
 }
 
 func init() {
-	RegisterCircuit("merkle_verify", func() Circuit { return &MerkleVerifyCircuit{} })
+	circuit.RegisterCircuit("merkle_verify", func() circuit.Circuit { return &MerkleVerifyCircuit{} })
 }

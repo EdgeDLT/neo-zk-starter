@@ -7,12 +7,16 @@ import (
 
 	"zkp_example/api"
 	"zkp_example/internal/build"
+	"zkp_example/internal/circuit/registration"
 	"zkp_example/internal/util"
 
 	"github.com/urfave/cli"
 )
 
 func main() {
+
+	registration.Init() // register circuits
+
 	app := &cli.App{
 		Name:  "zk circuit verifier",
 		Usage: "build zk circuits, generate keys, prove and verify computations, compile and deploy verifier contracts",
@@ -30,7 +34,7 @@ func main() {
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "circuit, c",
-						Value: "hash_commitment",
+						Value: "hash_commit",
 						Usage: "Name of the circuit to build",
 					},
 					cli.BoolFlag{
@@ -54,8 +58,8 @@ func main() {
 						return cli.NewExitError("Input is required", 1)
 					}
 
-					// For hash_commitment circuit, convert input to uint64
-					if circuitName == "hash_commitment" {
+					// For hash_commit circuit, convert input to uint64
+					if circuitName == "hash_commit" {
 						input = util.StringToUint64(input.(string), 10)
 					}
 
@@ -80,7 +84,7 @@ func main() {
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "circuit, c",
-						Value: "hash_commitment",
+						Value: "hash_commit",
 						Usage: "Name of the circuit to use",
 					},
 					cli.StringFlag{
@@ -104,7 +108,7 @@ func main() {
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "circuit, c",
-						Value: "hash_commitment",
+						Value: "hash_commit",
 						Usage: "Name of the circuit to compile",
 					},
 				},

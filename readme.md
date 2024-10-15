@@ -8,9 +8,9 @@ Credits to `consensys/gnark` for making ZK tech accessible and `nspcc-dev/neo-go
 
 This repo allows users to create, test, and work with multiple zero-knowledge circuits.
 
-By default, the commands will build and test the `hash_commitment` circuit, which allows a user to prove they know the preimage for a given hash commitment without revealing the preimage. There is also a `merkle_verify` circuit which can verify a proof for a MiMC-Merkle tree.
+By default, the commands will build and test the `hash_commit` circuit, which allows a user to prove they know the preimage for a given hash commitment without revealing the preimage. There is also a `merkle_verify` circuit which can verify a proof for a MiMC-Merkle tree.
 
-Most of the circuit-specific logic lives in `internal/circuit/` directory. Each circuit implements the `Circuit` interface defined in `circuit/circuit.go`.
+Circuits and their tests should be implemented in their own packages under `internal/circuit/` directory. Each circuit implements the `Circuit` interface defined in `circuit/circuit.go`.
 
 ### Build
 
@@ -61,17 +61,18 @@ go run . compile -c <circuit_name>
 
 To add your own ZKP circuit:
 
-1. Create a new file in `internal/circuit/` (e.g., `my_circuit.go`).
-2. Implement your circuit.
-3. Implement the Circuit interface for your new circuit.
-4. Register your circuit in the init() function of your new file:
+1. Create a new directory in `internal/circuit/` (e.g., `my_circuit`).
+2. Create a new file in `internal/circuit/my_circuit.go`.
+3. Import your circuit package in `internal/circuit/registration.go`.
+4. Implement your circuit input struct and Define function, containing the circuit logic.
+5. Finish implementing the Circuit interface for your new circuit with the PrepareInput and ValidInput functions.
 
 ```ps1
 func init() {
     RegisterCircuit("my_circuit", func() Circuit { return &MyCircuit{} })
 }
 ```
-4. Add specific tests for your circuit in a new test file (e.g., `my_circuit_test.go`).
+1. Add specific tests for your circuit in a new test file (e.g., `my_circuit_test.go`).
 
 The existing commands (build, prove, compile) will automatically work with your new circuit once it's registered.
 

@@ -1,18 +1,19 @@
 package circuit
 
 import (
+	"zkp_example/internal/circuit"
 	"zkp_example/internal/util"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"
 )
 
-type HashCommitmentCircuit struct {
+type HashCommitCircuit struct {
 	HiddenInput     frontend.Variable
 	InputCommitment frontend.Variable `gnark:",public"`
 }
 
-func (c *HashCommitmentCircuit) Define(api frontend.API) error {
+func (c *HashCommitCircuit) Define(api frontend.API) error {
 	// Prepare our MiMC hasher
 	// It is a SNARK-friendly alternative to SHA2
 	// Provides reduction in constraint count
@@ -28,7 +29,7 @@ func (c *HashCommitmentCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *HashCommitmentCircuit) PrepareInput(input interface{}) (Circuit, []string) {
+func (c *HashCommitCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
 	// The HashInputsToString function emulates the MiMC hash used in the circuit.
 	// It accepts any number of inputs as uint64 or *big.Int.
 	// Data is written to the hash in sequential writes, one for each input.
@@ -36,18 +37,18 @@ func (c *HashCommitmentCircuit) PrepareInput(input interface{}) (Circuit, []stri
 	// The helper function StringToBigInt can convert the string to a big.Int for use as a circuit input.
 	uint64Input, ok := input.(uint64)
 	if !ok {
-		panic("Input must be uint64 for HashCommitmentCircuit")
+		panic("Input must be uint64 for HashCommitCircuit")
 	}
 
 	inputCommit := util.HashInputsToString([]interface{}{uint64Input})
 
-	return &HashCommitmentCircuit{
+	return &HashCommitCircuit{
 		HiddenInput:     uint64Input,
 		InputCommitment: util.StringToBigInt(inputCommit, 10),
 	}, []string{inputCommit}
 }
 
-func (c *HashCommitmentCircuit) ValidInput() Circuit {
+func (c *HashCommitCircuit) ValidInput() circuit.Circuit {
 	var hiddenInput uint64 = 42.0
 	preparedInput, _ := c.PrepareInput(hiddenInput)
 
@@ -55,5 +56,5 @@ func (c *HashCommitmentCircuit) ValidInput() Circuit {
 }
 
 func init() {
-	RegisterCircuit("hash_commitment", func() Circuit { return &HashCommitmentCircuit{} })
+	circuit.RegisterCircuit("hash_commit", func() circuit.Circuit { return &HashCommitCircuit{} })
 }
