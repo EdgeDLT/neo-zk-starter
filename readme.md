@@ -62,10 +62,11 @@ go run . compile -c <circuit_name>
 To add your own ZKP circuit:
 
 1. Create a new directory in `internal/circuit/` (e.g., `my_circuit`).
-2. Create a new file in `internal/circuit/my_circuit.go`.
+2. Create a new file in `internal/circuit/my_circuit/my_circuit.go`.
 3. Import your circuit package in `internal/circuit/registration.go`.
 4. Implement your circuit input struct and Define function, containing the circuit logic.
 5. Finish implementing the Circuit interface for your new circuit with the `PrepareInput`, `ValidInput` and `init` functions.
+6. Add tests for your circuit in a new test file (e.g., `my_circuit_test.go`).
 
 ```ps1
 func init() {
