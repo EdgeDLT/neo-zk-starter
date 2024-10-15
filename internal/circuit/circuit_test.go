@@ -8,6 +8,9 @@ import (
 	"github.com/consensys/gnark/test"
 )
 
+// Doesnt work now that registration has moved to its own package
+// TODO: Fix so they run for all circuits
+
 // Test executing the circuit without running a ZK-SNARK prover (with the
 // help of test engine). It can be useful for the circuit debugging, see
 // https://docs.gnark.consensys.net/HowTo/debug_test#common-errors.
