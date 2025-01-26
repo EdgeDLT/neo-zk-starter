@@ -6,17 +6,15 @@ import (
 	"os"
 
 	"zkp_example/api"
+	"zkp_example/circuits"
+	_ "zkp_example/circuits/all"
 	"zkp_example/internal/build"
-	"zkp_example/internal/circuit/registration"
 	"zkp_example/internal/util"
 
 	"github.com/urfave/cli"
 )
 
 func main() {
-
-	registration.Init() // register circuits
-
 	app := &cli.App{
 		Name:  "zk circuit verifier",
 		Usage: "build zk circuits, generate keys, prove and verify computations, compile and deploy verifier contracts",
@@ -35,7 +33,7 @@ func main() {
 					cli.StringFlag{
 						Name:  "circuit, c",
 						Value: "hash_commit",
-						Usage: "Name of the circuit to build",
+						Usage: fmt.Sprintf("Name of the circuit to build. Available: %v", circuits.ListCircuits()),
 					},
 					cli.BoolFlag{
 						Name:  "rebuild, r",
@@ -46,50 +44,43 @@ func main() {
 			{
 				Name:    "prove",
 				Aliases: []string{"p"},
-				Usage:   "Generate a proof for a circuit",
+				Usage:   "Generate and verify a proof using test inputs",
 				Action: func(ctx *cli.Context) error {
 					circuitName := ctx.String("circuit")
-					var input interface{}
-					if ctx.IsSet("input") {
-						input = ctx.String("input")
-					} else if ctx.NArg() > 0 {
-						input = ctx.Args().First()
-					} else {
-						return cli.NewExitError("Input is required", 1)
+
+					// Get circuit and its test input
+					circuit, exists := circuits.Get(circuitName)
+					if !exists {
+						return fmt.Errorf("circuit not found: %s", circuitName)
 					}
 
-					// For hash_commit circuit, convert input to uint64
-					if circuitName == "hash_commit" {
-						input = util.StringToUint64(input.(string), 10)
-					}
+					input := circuit.ValidInput()
 
-					_, proof, vk, witness, additionalOutput, err := api.GenerateProof(circuitName, input)
+					// Generate proof
+					result, err := api.GenerateProof(circuitName, input)
 					if err != nil {
-						return cli.NewExitError(fmt.Sprintf("Failed to generate proof: %v", err), 1)
+						return fmt.Errorf("failed to generate proof: %v", err)
 					}
 
-					// Print all additional output
-					for _, output := range additionalOutput {
-						println(output)
+					// Print any additional output
+					for _, output := range result.AdditionalData {
+						fmt.Println(output)
 					}
 
-					println("Proof:", proof)
-					verified, err := api.VerifyProof(proof, vk, witness)
+					// Verify the proof
+					verified, err := api.VerifyProof(result.Proof, result.VerifyingKey, result.PublicWitness)
 					if err != nil {
-						return cli.NewExitError(fmt.Sprintf("Failed to verify proof: %v", err), 1)
+						return fmt.Errorf("failed to verify proof: %v", err)
 					}
-					println("Verify:", verified)
+
+					fmt.Printf("Proof generated and verified: %v\n", verified)
 					return nil
 				},
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "circuit, c",
 						Value: "hash_commit",
-						Usage: "Name of the circuit to use",
-					},
-					cli.StringFlag{
-						Name:  "input, i",
-						Usage: "Input for the circuit (optional, can be provided as positional argument)",
+						Usage: fmt.Sprintf("Name of the circuit to prove. Available: %v", circuits.ListCircuits()),
 					},
 				},
 			},
@@ -109,7 +100,7 @@ func main() {
 					cli.StringFlag{
 						Name:  "circuit, c",
 						Value: "hash_commit",
-						Usage: "Name of the circuit to compile",
+						Usage: fmt.Sprintf("Name of the circuit to compile. Available: %v", circuits.ListCircuits()),
 					},
 				},
 			},

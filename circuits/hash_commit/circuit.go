@@ -1,19 +1,19 @@
-package circuit
+package hash_commit
 
 import (
-	"zkp_example/internal/circuit"
+	"zkp_example/circuits"
 	"zkp_example/internal/util"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"
 )
 
-type HashCommitCircuit struct {
+type Circuit struct {
 	HiddenInput     frontend.Variable
 	InputCommitment frontend.Variable `gnark:",public"`
 }
 
-func (c *HashCommitCircuit) Define(api frontend.API) error {
+func (c *Circuit) Define(api frontend.API) error {
 	// Prepare our MiMC hasher
 	// It is a SNARK-friendly alternative to SHA2
 	// Provides reduction in constraint count
@@ -25,11 +25,10 @@ func (c *HashCommitCircuit) Define(api frontend.API) error {
 
 	// Check that the input commitment matches the hidden input hash
 	api.AssertIsEqual(c.InputCommitment, mimc.Sum())
-
 	return nil
 }
 
-func (c *HashCommitCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
+func (c *Circuit) PrepareInput(input interface{}) (circuits.Circuit, []string) {
 	// The HashInputsToString function emulates the MiMC hash used in the circuit.
 	// It accepts any number of inputs as uint64 or *big.Int.
 	// Data is written to the hash in sequential writes, one for each input.
@@ -42,13 +41,13 @@ func (c *HashCommitCircuit) PrepareInput(input interface{}) (circuit.Circuit, []
 
 	inputCommit := util.HashInputsToString([]interface{}{uint64Input})
 
-	return &HashCommitCircuit{
+	return &Circuit{
 		HiddenInput:     uint64Input,
 		InputCommitment: util.StringToBigInt(inputCommit, 10),
 	}, []string{inputCommit}
 }
 
-func (c *HashCommitCircuit) ValidInput() circuit.Circuit {
+func (c *Circuit) ValidInput() circuits.Circuit {
 	var hiddenInput uint64 = 42.0
 	preparedInput, _ := c.PrepareInput(hiddenInput)
 
@@ -56,5 +55,7 @@ func (c *HashCommitCircuit) ValidInput() circuit.Circuit {
 }
 
 func init() {
-	circuit.RegisterCircuit("hash_commit", func() circuit.Circuit { return &HashCommitCircuit{} })
+	circuits.Register("hash_commit", func() circuits.Circuit {
+		return &Circuit{}
+	})
 }

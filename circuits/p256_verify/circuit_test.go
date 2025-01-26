@@ -15,8 +15,8 @@ import (
 func TestP256SigVerifyCircuit(t *testing.T) {
 	assert := test.NewAssert(t)
 
-	circuit := &P256SigVerifyCircuit{}
-	validAssignment := circuit.ValidInput().(*P256SigVerifyCircuit)
+	circuit := &Circuit{}
+	validAssignment := circuit.ValidInput().(*Circuit)
 
 	// Test with valid inputs
 	assert.ProverSucceeded(circuit, validAssignment,
@@ -24,7 +24,7 @@ func TestP256SigVerifyCircuit(t *testing.T) {
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid signature
-	invalidSigAssignment := &P256SigVerifyCircuit{
+	invalidSigAssignment := &Circuit{
 		PublicKey: validAssignment.PublicKey,
 		Signature: ecdsa.Signature[emparams.P256Fr]{
 			R: validAssignment.Signature.R,
@@ -38,10 +38,10 @@ func TestP256SigVerifyCircuit(t *testing.T) {
 
 	// Test with invalid MessageHash
 	mockHash := hash.Sha256([]byte("construct additional pylons"))
-	invalidMsgAssignment := &P256SigVerifyCircuit{
+	invalidMsgAssignment := &Circuit{
 		PublicKey:   validAssignment.PublicKey,
 		Signature:   validAssignment.Signature,
-		MessageHash: emulated.ValueOf[emparams.P256Fr](mockHash.BytesBE()), // Some arbitrary invalid MessageHash
+		MessageHash: emulated.ValueOf[emparams.P256Fr](mockHash.BytesBE()),
 	}
 	assert.ProverFailed(circuit, invalidMsgAssignment,
 		test.WithCurves(ecc.BLS12_381),

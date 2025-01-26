@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	_ "zkp_example/circuits/all"
 	_ "zkp_example/internal/test_init"
 
 	"github.com/nspcc-dev/neo-go/pkg/neotest"
@@ -13,7 +14,7 @@ import (
 
 // More about circuit testing using gnark/test package: https://pkg.go.dev/github.com/consensys/gnark/test@v0.7.0
 func TestBuild(t *testing.T) {
-	circuitNames := []string{"hash_commitment"} // Add more circuit names as needed
+	circuitNames := []string{"hash_commit"} // , "merkle_verify", "p256_verify"} // Add more circuit names as needed
 
 	for _, circuitName := range circuitNames {
 		t.Run(circuitName, func(t *testing.T) {

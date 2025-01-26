@@ -1,7 +1,7 @@
 package p256_verify
 
 import (
-	"zkp_example/internal/circuit"
+	"zkp_example/circuits"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_emulated"
@@ -12,7 +12,7 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/wallet"
 )
 
-type P256SigVerifyCircuit struct {
+type Circuit struct {
 	PublicKey   ecdsa.PublicKey[emulated.P256Fp, emulated.P256Fr] `gnark:",public"`
 	Signature   ecdsa.Signature[emulated.P256Fr]                  `gnark:",public"`
 	MessageHash emulated.Element[emulated.P256Fr]                 `gnark:",public"`
@@ -22,15 +22,12 @@ func VerifyP256Sig(api frontend.API, publicKey ecdsa.PublicKey[emulated.P256Fp, 
 	publicKey.Verify(api, sw_emulated.GetP256Params(), &messageHash, &signature)
 }
 
-func (c *P256SigVerifyCircuit) Define(api frontend.API) error {
-
+func (c *Circuit) Define(api frontend.API) error {
 	VerifyP256Sig(api, c.PublicKey, c.MessageHash, c.Signature)
-
 	return nil
 }
 
-func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
-
+func (c *Circuit) PrepareInput(input interface{}) (circuits.Circuit, []string) {
 	inputData, ok := input.(struct {
 		PublicKey   *keys.PublicKey
 		MessageHash []byte
@@ -46,7 +43,7 @@ func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit,
 	sigS := emulated.ValueOf[emulated.P256Fr](inputData.Signature[32:])
 	msg := emulated.ValueOf[emulated.P256Fr](inputData.MessageHash)
 
-	return &P256SigVerifyCircuit{
+	return &Circuit{
 		PublicKey: ecdsa.PublicKey[emulated.P256Fp, emulated.P256Fr]{
 			X: keyX,
 			Y: keyY,
@@ -59,11 +56,10 @@ func (c *P256SigVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit,
 	}, []string{}
 }
 
-func (c *P256SigVerifyCircuit) ValidInput() circuit.Circuit {
-
+func (c *Circuit) ValidInput() circuits.Circuit {
 	w, _ := wallet.NewAccount()
-	MessageHash := []byte("hello world")
-	hashed := hash.Sha256(MessageHash)
+	messageHash := []byte("hello world")
+	hashed := hash.Sha256(messageHash)
 	signature := w.PrivateKey().SignHash(hashed)
 
 	preparedInputs, _ := c.PrepareInput(struct {
@@ -80,5 +76,5 @@ func (c *P256SigVerifyCircuit) ValidInput() circuit.Circuit {
 }
 
 func init() {
-	circuit.RegisterCircuit("p256_verify", func() circuit.Circuit { return &P256SigVerifyCircuit{} })
+	circuits.Register("p256_verify", func() circuits.Circuit { return &Circuit{} })
 }

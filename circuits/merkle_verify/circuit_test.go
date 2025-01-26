@@ -1,4 +1,4 @@
-package circuit
+package merkle_verify
 
 import (
 	"testing"
@@ -9,11 +9,11 @@ import (
 	"github.com/consensys/gnark/test"
 )
 
-func TestMerkleVerifyCircuit(t *testing.T) {
+func TestCircuit(t *testing.T) {
 	assert := test.NewAssert(t)
 
-	circuit := &MerkleVerifyCircuit{}
-	validAssignment := circuit.ValidInput().(*MerkleVerifyCircuit)
+	circuit := &Circuit{}
+	validAssignment := circuit.ValidInput().(*Circuit)
 
 	// Test with valid inputs
 	assert.ProverSucceeded(circuit, validAssignment,
@@ -21,7 +21,7 @@ func TestMerkleVerifyCircuit(t *testing.T) {
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid root
-	invalidRootAssignment := &MerkleVerifyCircuit{
+	invalidRootAssignment := &Circuit{
 		LeafHash:      validAssignment.LeafHash,
 		ProofElements: validAssignment.ProofElements,
 		Root:          frontend.Variable(420), // Some arbitrary invalid root
@@ -31,7 +31,7 @@ func TestMerkleVerifyCircuit(t *testing.T) {
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid leaf hash
-	invalidLeafAssignment := &MerkleVerifyCircuit{
+	invalidLeafAssignment := &Circuit{
 		LeafHash:      frontend.Variable(5000), // Some arbitrary invalid leaf hash
 		ProofElements: validAssignment.ProofElements,
 		Root:          validAssignment.Root,
@@ -41,7 +41,7 @@ func TestMerkleVerifyCircuit(t *testing.T) {
 		test.WithBackends(backend.GROTH16))
 
 	// Test with invalid proof element
-	invalidProofAssignment := &MerkleVerifyCircuit{
+	invalidProofAssignment := &Circuit{
 		LeafHash: validAssignment.LeafHash,
 		ProofElements: func() [MaxProofElements]frontend.Variable {
 			pe := validAssignment.ProofElements
@@ -55,7 +55,7 @@ func TestMerkleVerifyCircuit(t *testing.T) {
 		test.WithBackends(backend.GROTH16))
 
 	// Test with extra (non-zero) proof element
-	extraProofAssignment := &MerkleVerifyCircuit{
+	extraProofAssignment := &Circuit{
 		LeafHash: validAssignment.LeafHash,
 		ProofElements: func() [MaxProofElements]frontend.Variable {
 			pe := validAssignment.ProofElements

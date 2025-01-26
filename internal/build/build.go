@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"zkp_example/internal/circuit"
+	"zkp_example/circuits"
 	"zkp_example/internal/util"
 
 	"github.com/consensys/gnark-crypto/ecc"
@@ -18,7 +18,7 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract/zkpbinding"
 )
 
-func createKeysAndCircuit(circuitName string, circ circuit.Circuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
+func createKeysAndCircuit(circuitName string, circ circuits.Circuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
 	println("Creating new proving/verifying keys and circuit")
 	ccs, _ := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circ)
 	pk, vk, _ := groth16.Setup(ccs)
@@ -33,8 +33,8 @@ func createKeysAndCircuit(circuitName string, circ circuit.Circuit) (constraint.
 	return ccs, pk, vk
 }
 
-func Init(circuitName string, rebuild bool) (circuit.Circuit, constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
-	circ, exists := circuit.GetCircuit(circuitName)
+func Init(circuitName string, rebuild bool) (circuits.Circuit, constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
+	circ, exists := circuits.Get(circuitName)
 	if !exists {
 		panic("Circuit not found")
 	}
@@ -60,7 +60,7 @@ func Init(circuitName string, rebuild bool) (circuit.Circuit, constraint.Constra
 	return circ, ccs, pk, vk
 }
 
-func PrepareWitness(assignment circuit.Circuit) (witness.Witness, witness.Witness) {
+func PrepareWitness(assignment circuits.Circuit) (witness.Witness, witness.Witness) {
 
 	// define the witness
 	witness, _ := frontend.NewWitness(assignment, ecc.BLS12_381.ScalarField())
@@ -70,15 +70,19 @@ func PrepareWitness(assignment circuit.Circuit) (witness.Witness, witness.Witnes
 }
 
 func Build(circuitName string, rebuild bool) (string, string, *zkpbinding.VerifyProofArgs) {
+	circuit, exists := circuits.Get(circuitName)
+	if !exists {
+		panic(fmt.Sprintf("Circuit not found: %s", circuitName))
+	}
 
 	// Step 1: compile circuit code into R1CS and setup keys
-	circuit, ccs, pk, vk := Init(circuitName, rebuild)
+	_, ccs, pk, vk := Init(circuitName, rebuild)
 
 	// Step 2: prepare inputs
 	assignment := circuit.ValidInput()
 
 	// Step 3: setup test witness
-	witness, publicWitness := PrepareWitness(assignment)
+	witness, publicWitness := circuits.PrepareWitness(assignment)
 
 	// Step 4: create groth16 proof
 	proof, _ := groth16.Prove(ccs, pk, witness)

@@ -1,9 +1,9 @@
-package circuit
+package merkle_verify
 
 import (
 	"fmt"
 	"math/big"
-	"zkp_example/internal/circuit"
+	"zkp_example/circuits"
 	"zkp_example/internal/util"
 
 	"github.com/consensys/gnark/frontend"
@@ -16,9 +16,9 @@ type Leaf struct {
 	Nonce     *big.Int
 }
 
-const MaxProofElements = 4 // Adjust this to your maximum expected depth or create one circuit per depth
+const MaxProofElements = 4
 
-type MerkleVerifyCircuit struct {
+type Circuit struct {
 	LeafHash      frontend.Variable                   `gnark:",public"` // Hash of the leaf data
 	ProofElements [MaxProofElements]frontend.Variable `gnark:",public"` // Array of sibling hashes along the Merkle proof path
 	Root          frontend.Variable                   `gnark:",public"` // Expected Merkle root
@@ -50,19 +50,19 @@ func VerifyMerkleProof(api frontend.API, leafHash, root frontend.Variable, proof
 	return nil
 }
 
-func (circuit *MerkleVerifyCircuit) Define(api frontend.API) error {
-	api.Println("LeafHash:", circuit.LeafHash)
-	api.Println("Root:", circuit.Root)
+func (c *Circuit) Define(api frontend.API) error {
+	api.Println("LeafHash:", c.LeafHash)
+	api.Println("Root:", c.Root)
 
 	// Convert the fixed-size array to a slice
 	proofElementsSlice := make([]frontend.Variable, MaxProofElements)
 	for i := 0; i < MaxProofElements; i++ {
-		proofElementsSlice[i] = circuit.ProofElements[i]
+		proofElementsSlice[i] = c.ProofElements[i]
 		api.Println(fmt.Sprintf("ProofElement[%d]:", i), proofElementsSlice[i])
 	}
 
 	// Use the VerifyMerkleProof function
-	err := VerifyMerkleProof(api, circuit.LeafHash, circuit.Root, proofElementsSlice)
+	err := VerifyMerkleProof(api, c.LeafHash, c.Root, proofElementsSlice)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (circuit *MerkleVerifyCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *MerkleVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit, []string) {
+func (c *Circuit) PrepareInput(input interface{}) (circuits.Circuit, []string) {
 	// Expecting the input to be a struct with the necessary fields
 	inputData, ok := input.(struct {
 		LeafHash      *big.Int
@@ -90,15 +90,14 @@ func (c *MerkleVerifyCircuit) PrepareInput(input interface{}) (circuit.Circuit, 
 		proofElements[i] = frontend.Variable(0)
 	}
 
-	return &MerkleVerifyCircuit{
+	return &Circuit{
 		LeafHash:      util.StringToBigInt(inputData.LeafHash.String(), 10),
 		ProofElements: proofElements,
 		Root:          util.StringToBigInt(inputData.Root.String(), 10),
 	}, []string{inputData.LeafHash.String(), inputData.Root.String()}
 }
 
-func (c *MerkleVerifyCircuit) ValidInput() circuit.Circuit {
-
+func (c *Circuit) ValidInput() circuits.Circuit {
 	// Example Merkle tree stores account information for a ZK-Rollup
 	// Create two account leaves
 	leaves := []Leaf{
@@ -139,5 +138,5 @@ func (c *MerkleVerifyCircuit) ValidInput() circuit.Circuit {
 }
 
 func init() {
-	circuit.RegisterCircuit("merkle_verify", func() circuit.Circuit { return &MerkleVerifyCircuit{} })
+	circuits.Register("merkle_verify", func() circuits.Circuit { return &Circuit{} })
 }

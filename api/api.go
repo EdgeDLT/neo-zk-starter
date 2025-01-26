@@ -2,40 +2,63 @@ package api
 
 import (
 	"fmt"
+	"zkp_example/circuits"
 	"zkp_example/internal/build"
-	"zkp_example/internal/circuit"
 
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract/zkpbinding"
 )
 
-// GenerateProof generates a proof for the specified circuit with the given input
-func GenerateProof(circuitName string, input interface{}) (*zkpbinding.VerifyProofArgs, groth16.Proof, groth16.VerifyingKey, witness.Witness, []string, error) {
-	circ, exists := circuit.GetCircuit(circuitName)
+// ProofResult contains all outputs from proof generation
+type ProofResult struct {
+	VerifyArgs     *zkpbinding.VerifyProofArgs
+	Proof          groth16.Proof
+	VerifyingKey   groth16.VerifyingKey
+	PublicWitness  witness.Witness
+	AdditionalData []string
+}
+
+// GenerateProof generates a proof for the specified circuit with the given input.
+// The input type must match what the circuit's PrepareInput method expects.
+// For example:
+// - hash_commit: expects uint64
+// - merkle_verify: expects struct{LeafHash, ProofElements, Root}
+// - p256_verify: expects struct{PublicKey, MessageHash, Signature}
+func GenerateProof(circuitName string, input interface{}) (*ProofResult, error) {
+	circ, exists := circuits.Get(circuitName)
 	if !exists {
-		return nil, nil, nil, nil, nil, fmt.Errorf("circuit not found: %s", circuitName)
+		return nil, fmt.Errorf("circuit not found: %s", circuitName)
 	}
 
 	assignment, additionalOutput := circ.PrepareInput(input)
+	if assignment == nil {
+		return nil, fmt.Errorf("failed to prepare input for circuit %s", circuitName)
+	}
 
 	_, ccs, pk, vk := build.Init(circuitName, false)
-	witness, publicWitness := circuit.PrepareWitness(assignment)
+	witness, publicWitness := circuits.PrepareWitness(assignment)
 
 	proof, err := groth16.Prove(ccs, pk, witness)
 	if err != nil {
-		return nil, nil, nil, nil, nil, fmt.Errorf("failed to generate proof: %w", err)
+		return nil, fmt.Errorf("failed to generate proof: %w", err)
 	}
 
 	args, err := zkpbinding.GetVerifyProofArgs(proof, publicWitness)
 	if err != nil {
-		return nil, nil, nil, nil, nil, fmt.Errorf("failed to get verify proof args: %w", err)
+		return nil, fmt.Errorf("failed to get verify proof args: %w", err)
 	}
 
-	return args, proof, vk, publicWitness, additionalOutput, nil
+	return &ProofResult{
+		VerifyArgs:     args,
+		Proof:          proof,
+		VerifyingKey:   vk,
+		PublicWitness:  publicWitness,
+		AdditionalData: additionalOutput,
+	}, nil
 }
 
-// Verifies that the proof is valid
+// VerifyProof verifies a proof against a verifying key and public witness
 func VerifyProof(proof groth16.Proof, vk groth16.VerifyingKey, publicWitness witness.Witness) (bool, error) {
 	err := groth16.Verify(proof, vk, publicWitness)
 	if err != nil {
