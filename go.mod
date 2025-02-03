@@ -5,11 +5,12 @@ go 1.22.0
 require (
 	github.com/consensys/gnark v0.11.0
 	github.com/consensys/gnark-crypto v0.14.0
-	github.com/nspcc-dev/neo-go v0.106.3
+	github.com/nspcc-dev/neo-go v0.107.3-0.20250203190037-267d7dca78a3
 	github.com/urfave/cli v1.22.16
 )
 
 require (
+	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -34,8 +35,10 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/nspcc-dev/go-ordered-json v0.0.0-20241105102150-8138dd0bc668 // indirect
 	github.com/nspcc-dev/hrw/v2 v2.0.3 // indirect
+	github.com/nspcc-dev/neofs-api-go/v2 v2.14.1-0.20240827150555-5ce597aa14ea // indirect
 	github.com/nspcc-dev/neofs-sdk-go v1.0.0-rc.12.0.20241205083504-335d9fe90f24 // indirect
 	github.com/nspcc-dev/rfc6979 v0.2.3 // indirect
+	github.com/nspcc-dev/tzhash v1.8.2 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
@@ -57,6 +60,7 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
 	golang.org/x/mod v0.22.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
