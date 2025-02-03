@@ -1,12 +1,10 @@
-module zkp_example
+module neo_zk_starter
 
 go 1.22.0
 
-toolchain go1.23.2
-
 require (
-	github.com/consensys/gnark v0.12.0
-	github.com/consensys/gnark-crypto v0.15.0
+	github.com/consensys/gnark v0.11.0
+	github.com/consensys/gnark-crypto v0.14.0
 	github.com/nspcc-dev/neo-go v0.106.3
 	github.com/urfave/cli v1.22.16
 )
@@ -27,7 +25,8 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
-	github.com/ingonyama-zk/icicle/v3 v3.4.0 // indirect
+	github.com/ingonyama-zk/icicle v1.1.0 // indirect
+	github.com/ingonyama-zk/iciclegnark v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect

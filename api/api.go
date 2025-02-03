@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"zkp_example/circuits"
-	"zkp_example/internal/build"
+	"neo_zk_starter/circuits"
+	"neo_zk_starter/internal/build"
 
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/backend/witness"

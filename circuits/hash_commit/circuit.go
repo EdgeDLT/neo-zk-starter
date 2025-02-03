@@ -1,8 +1,8 @@
 package hash_commit
 
 import (
-	"zkp_example/circuits"
-	"zkp_example/internal/util"
+	"neo_zk_starter/circuits"
+	"neo_zk_starter/internal/util"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"

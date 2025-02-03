@@ -1,26 +1,23 @@
-## ZK dApp Starter
+## Neo ZK Starter
 
 A zero-knowledge dApp starter template for Neo N3 blockchain developers. This project helps you:
 - Write and test ZK circuits in Go
 - Generate and verify proofs both on-chain and off-chain
 - Deploy ZK-powered smart contracts to Neo N3
 
-Credits to `consensys/gnark` for making ZK tech accessible and `nspcc-dev/neo-go` for bringing them to Neo developers.
+Credits to `consensys/gnark` for making ZK tech accessible and `nspcc-dev/neo-go` for bringing them to Neo developers. Code improvements, feature requests, and new circuit examples are welcomed and appreciated.
 
 ### Overview
 
 This repo includes several example circuits demonstrating common ZK patterns:
 
 - `hash_commit`: Proves knowledge of a preimage for a hash commitment
-  - Pattern: Prove you know a value without revealing it
   - Use case: Private voting, sealed bids
 
-- `merkle_verify`: Verifies membership in a MiMC-Merkle tree
-  - Pattern: Prove membership in a set without revealing the set
+- `merkle_verify`: Verifies membership in a MiMC-Merkle tree without revealing the set
   - Use case: Private token transfers, allowlists
 
 - `p256_verify`: Verifies ECDSA signatures on the P256 curve
-  - Pattern: Prove signature validity without revealing the signature
   - Use case: Anonymous credentials, private identity verification, recursive proof verification
 
 ### Quick Start
@@ -55,16 +52,16 @@ verifyArgs := result.VerifyArgs  # Contains formatted proof for Neo verification
 ### Project Structure
 
 ```
-circuits/             # All ZK circuits live here
+circuits/            # All ZK circuits live here
 ├── all/             # Imports and registers all circuits
 ├── hash_commit/     # Hash commitment circuit
 ├── merkle_verify/   # Merkle tree verification
 └── p256_verify/     # P256 signature verification
 
 internal/            # Internal packages
-├── build/          # Build process utilities
-├── setup/          # Trusted setup utilities
-└── util/           # Common utilities
+├── build/           # Build process utilities
+├── setup/           # Trusted setup utilities
+└── util/            # Common utilities
 ```
 
 ### Development Commands
@@ -104,7 +101,7 @@ go run . compile -c <circuit_name>
 package my_circuit
 
 import (
-    "zkp_example/circuits"
+    "neo_zk_starter/circuits"
     "github.com/consensys/gnark/frontend"
 )
 
@@ -142,7 +139,7 @@ func init() {
 ```go
 import (
     // ... existing imports ...
-    _ "zkp_example/circuits/my_circuit"
+    _ "neo_zk_starter/circuits/my_circuit"
 )
 ```
 
@@ -163,7 +160,7 @@ go run . build -c my_circuit
 go run . compile -c my_circuit
 ```
 
-3. Deploy the contract using neo-go
+3. Deploy the contract to target network using your preferred method.
 
 4. Generate and verify proofs:
 ```go
@@ -200,6 +197,6 @@ The development build uses a simplified setup. For production:
 3. **Security**:
    - Conduct thorough security audits
    - Test extensively with real-world inputs
-   - Consider circuit size and gas costs
+   - Consider circuit size and proof generation time
 
 Remember that ZK proofs are cryptographic primitives - careful review and testing is essential.

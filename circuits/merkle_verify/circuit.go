@@ -3,8 +3,8 @@ package merkle_verify
 import (
 	"fmt"
 	"math/big"
-	"zkp_example/circuits"
-	"zkp_example/internal/util"
+	"neo_zk_starter/circuits"
+	"neo_zk_starter/internal/util"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"

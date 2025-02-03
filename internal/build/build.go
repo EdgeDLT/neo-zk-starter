@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"zkp_example/circuits"
-	"zkp_example/internal/util"
+	"neo_zk_starter/circuits"
+	"neo_zk_starter/internal/util"
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend/groth16"
@@ -20,9 +20,15 @@ import (
 
 func createKeysAndCircuit(circuitName string, circ circuits.Circuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey) {
 	println("Creating new proving/verifying keys and circuit")
-	ccs, _ := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circ)
-	pk, vk, _ := groth16.Setup(ccs)
-	// pk, vk, _ := setup.Setup(ccs, "data/response21", 21) // use a real response file for production
+	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circ)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to compile circuit: %v", err))
+	}
+	pk, vk, err := groth16.Setup(ccs)
+	// pk, vk, err := .Setup(ccs, "data/response21", 21) // use a real response file for production
+	if err != nil {
+		panic(fmt.Sprintf("Failed to setup keys: %v", err))
+	}
 
 	util.WriteDataToFile(circuitName, "prover_key", pk)
 	util.WriteDataToFile(circuitName, "verifier_key", vk)

@@ -1,7 +1,7 @@
 package p256_verify
 
 import (
-	"zkp_example/circuits"
+	"neo_zk_starter/circuits"
 
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_emulated"

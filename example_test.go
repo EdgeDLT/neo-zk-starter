@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"zkp_example/api"
-	_ "zkp_example/circuits/all" // Important: register all circuits
+	"neo_zk_starter/api"
+	_ "neo_zk_starter/circuits/all" // Important: register all circuits
 )
 
 func TestProofGeneration(t *testing.T) {

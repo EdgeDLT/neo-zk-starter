@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"zkp_example/api"
-	"zkp_example/circuits"
-	_ "zkp_example/circuits/all"
-	"zkp_example/internal/build"
-	"zkp_example/internal/util"
+	"neo_zk_starter/api"
+	"neo_zk_starter/circuits"
+	_ "neo_zk_starter/circuits/all"
+	"neo_zk_starter/internal/build"
+	"neo_zk_starter/internal/util"
 
 	"github.com/urfave/cli"
 )
